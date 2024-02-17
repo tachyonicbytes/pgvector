@@ -39,6 +39,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install libipc-run-perl
       - run: make prove_installcheck
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pgvector-${{ matrix.postgres }}-${{ matrix.os }}
+          path: |
+            ./vector.so
+            ./vector.control
+            ./sql/vector--0.6.0.sql
+
   mac:
     runs-on: macos-latest
     if: ${{ !startsWith(github.ref_name, 'windows') }}
@@ -54,6 +63,15 @@ jobs:
       - run: make installcheck
       - if: ${{ failure() }}
         run: cat regression.diffs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pgvector-14-macos
+          path: |
+            ./vector.so
+            ./vector.control
+            ./sql/vector--0.6.0.sql
+
       - run: |
           brew install cpanm
           cpanm --notest IPC::Run
@@ -73,7 +91,19 @@ jobs:
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" && ^
           nmake /NOLOGO /F Makefile.win && ^
           nmake /NOLOGO /F Makefile.win install && ^
-          nmake /NOLOGO /F Makefile.win installcheck && ^
+          nmake /NOLOGO /F Makefile.win installcheck
+        shell: cmd
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pgvector-14-windows
+          path: |
+            ./vector.dll
+            ./vector.control
+            ./sql/vector--0.6.0.sql
+
+      - run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" && ^
           nmake /NOLOGO /F Makefile.win clean && ^
           nmake /NOLOGO /F Makefile.win uninstall
         shell: cmd
